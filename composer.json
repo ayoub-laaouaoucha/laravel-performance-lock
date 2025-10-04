@@ -1,0 +1,36 @@
+{
+  "name": "ayoub/laravel-site-lock",
+  "description": "Lock your Laravel website until client payment",
+  "keywords": [
+    "laravel",
+    "site-lock",
+    "payment",
+    "middleware"
+  ],
+  "type": "library",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "AYOUB LAAOUAOUCHA",
+      "email": "laaouaoucha333@gmail.com"
+    }
+  ],
+  "require": {
+    "php": "^8.2|^8.3",
+    "illuminate/support": "^11.0|^12.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Ayoub\\SiteLock\\": "src/"
+    }
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "Ayoub\\SiteLock\\SiteLockServiceProvider"
+      ]
+    }
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true
+}
