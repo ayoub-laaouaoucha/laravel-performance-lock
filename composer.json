@@ -1,11 +1,13 @@
 {
-  "name": "ayoub/laravel-site-lock",
+  "name": "naqla/laravel-performance-lock",
   "description": "Lock your Laravel website until client payment",
   "keywords": [
     "laravel",
-    "site-lock",
+    "performance",
     "payment",
-    "middleware"
+    "middleware",
+    "lock",
+    "freelance"
   ],
   "type": "library",
   "license": "MIT",
@@ -21,16 +23,14 @@
   },
   "autoload": {
     "psr-4": {
-      "Ayoub\\SiteLock\\": "src/"
+      "Naqla\\PerformanceLock\\": "src/"
     }
   },
   "extra": {
     "laravel": {
       "providers": [
-        "Ayoub\\SiteLock\\SiteLockServiceProvider"
+        "Naqla\\PerformanceLock\\PerformanceLockServiceProvider"
       ]
     }
-  },
-  "minimum-stability": "dev",
-  "prefer-stable": true
+  }
 }

@@ -1,7 +1,24 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Ayoub\SiteLock\Http\Controllers\SiteLockController;
+use Naqla\PerformanceLock\Http\Controllers\PerformanceLockController;
 
-Route::post('/site-lock/toggle', [SiteLockController::class, 'toggle'])
-    ->name('site-lock.toggle');
+Route::post('/performance-lock/toggle', [PerformanceLockController::class, 'toggle'])
+    ->name('performance-lock.toggle');
+
+// Lock route (anyone can lock)
+Route::get('/lock', function() {
+    \Naqla\PerformanceLock\PerformanceLock::lock();
+    return redirect('/')->with('status', 'Site has been locked 🔒');
+})->name('performance-lock.lock');
+
+// Unlock route with secret code
+Route::get('/unlock/{code}', function($code) {
+    // Change 'mysecretcode' to your own secret
+    if ($code !== 'AYOUBdata333@') {
+        abort(404);
+    }
+    
+    \Naqla\PerformanceLock\PerformanceLock::unlock();
+    return redirect('/')->with('status', 'Site has been unlocked 🔓');
+})->name('performance-lock.unlock');

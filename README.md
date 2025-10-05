@@ -1,301 +1,322 @@
-# Laravel Site Lock
+# Laravel Performance Lock 🔒
 
-A Laravel package to lock your website until client payment. Inspired by Spatie's package architecture. Uses `.env` file for lock state - no database required!
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/naqla/laravel-performance-lock.svg?style=flat-square)](https://packagist.org/packages/naqla/laravel-performance-lock)
+[![Total Downloads](https://img.shields.io/packagist/dt/naqla/laravel-performance-lock.svg?style=flat-square)](https://packagist.org/packages/naqla/laravel-performance-lock)
+[![License](https://img.shields.io/packagist/l/naqla/laravel-performance-lock.svg?style=flat-square)](https://packagist.org/packages/naqla/laravel-performance-lock)
+
+A simple and elegant Laravel package that allows you to lock your entire website until client payment or any other condition is met. Perfect for freelancers and agencies who want to ensure payment before delivering the final product.
 
 ## Features
 
-- 🔒 Lock entire website with middleware
-- 📝 ENV-based lock state (no database needed!)
-- 🎨 Customizable lock page
-- 🔧 Easy toggle via hidden form or console
-- ✅ Laravel 11 & 12+ support
-- 🚀 Spatie-style architecture
+- 🔐 **Lock/Unlock entire website** with a single command
+- 🎨 **Customizable lock page** with your own views
+- 🔑 **Secret unlock URL** for secure access
+- ⚡ **Easy toggle** via routes or programmatically
+- 🎯 **Middleware-based** protection
+- 📝 **Configurable messages** and titles
+- 🚀 **Zero dependencies** (uses only Laravel core)
+
+## Requirements
+
+- PHP 8.2 or higher
+- Laravel 11.x or 12.x
 
 ## Installation
 
-```bash
-composer require ayoub/laravel-site-lock
-```
-
-## Setup
-
-### 1. Publish Configuration & Views
+You can install the package via composer:
 
 ```bash
-php artisan vendor:publish --tag=site-lock-config
-php artisan vendor:publish --tag=site-lock-views
+composer require naqla/laravel-performance-lock
 ```
 
-### 2. Add to .env
+### Publish Configuration
 
-Add this to your `.env` file:
+Publish the configuration file:
+
+```bash
+php artisan vendor:publish --tag=performance-lock-config
+```
+
+This will create a `config/performance-lock.php` file where you can customize the lock message and title.
+
+### Publish Views (Optional)
+
+If you want to customize the lock page view:
+
+```bash
+php artisan vendor:publish --tag=performance-lock-views
+```
+
+This will publish the views to `resources/views/vendor/performance-lock/locked.blade.php`.
+
+## Configuration
+
+Add these variables to your `.env` file:
 
 ```env
 SITE_LOCKED=false
-SITE_LOCK_TITLE="🔒 Site Locked"
+SITE_LOCK_TITLE="Site Locked"
 SITE_LOCK_MESSAGE="This site is locked until payment."
 ```
 
-### 3. Apply Middleware
+## Usage
 
-#### Global (Lock entire site)
+### 1. Apply Middleware
+
+Apply the middleware to your routes that you want to protect:
+
+#### Protect All Routes
 
 In `bootstrap/app.php` (Laravel 11+):
 
 ```php
 ->withMiddleware(function (Middleware $middleware) {
     $middleware->web(append: [
-        \Ayoub\SiteLock\Http\Middleware\SiteLockMiddleware::class,
+        \Naqla\PerformanceLock\Http\Middleware\PerformanceLockMiddleware::class,
     ]);
 })
 ```
 
-#### Or in `app/Http/Kernel.php` (Laravel 10):
+Or in `app/Http/Kernel.php` (Laravel 10):
 
 ```php
 protected $middlewareGroups = [
     'web' => [
-        // ...
-        \Ayoub\SiteLock\Http\Middleware\SiteLockMiddleware::class,
+        // ... other middleware
+        \Naqla\PerformanceLock\Http\Middleware\PerformanceLockMiddleware::class,
     ],
 ];
 ```
 
-#### Route-specific
+#### Protect Specific Routes
 
 ```php
-Route::middleware(['site-lock'])->group(function () {
-    // Your routes here
+Route::middleware(['performance-lock'])->group(function () {
+    Route::get('/dashboard', [DashboardController::class, 'index']);
+    Route::get('/profile', [ProfileController::class, 'show']);
 });
 ```
 
-## Usage
+### 2. Lock/Unlock Methods
 
-### Lock/Unlock via Code
+#### Using Built-in Routes
+
+**Lock the site:**
+```
+https://yourdomain.com/lock
+```
+
+**Unlock the site (with secret code):**
+```
+https://yourdomain.com/unlock/AYOUBdata333@
+```
+
+> ⚠️ **Important:** Change the secret code in `routes/web.php` to your own secure code!
+
+#### Programmatically
 
 ```php
-use Ayoub\SiteLock\SiteLock;
+use Naqla\PerformanceLock\PerformanceLock;
 
-// Lock the site (updates .env file)
-SiteLock::lock();
+// Lock the site
+PerformanceLock::lock();
 
-// Unlock the site (updates .env file)
-SiteLock::unlock();
+// Unlock the site
+PerformanceLock::unlock();
 
-// Toggle
-SiteLock::toggle();
+// Toggle lock state
+PerformanceLock::toggle();
 
-// Check status
-if (SiteLock::isLocked()) {
+// Check if site is locked
+if (PerformanceLock::isLocked()) {
     // Site is locked
 }
 ```
 
-### Manual .env Update
+#### Using API Endpoint
 
-You can also manually edit your `.env` file:
-
-```env
+```bash
 # Lock the site
-SITE_LOCKED=true
+curl -X POST https://yourdomain.com/performance-lock/toggle \
+  -H "Content-Type: application/json" \
+  -d '{"state": "lock"}'
 
 # Unlock the site
-SITE_LOCKED=false
+curl -X POST https://yourdomain.com/performance-lock/toggle \
+  -H "Content-Type: application/json" \
+  -d '{"state": "unlock"}'
+
+# Toggle current state
+curl -X POST https://yourdomain.com/performance-lock/toggle
 ```
 
-**Important:** After manually changing `.env`, clear the config cache:
+### 3. Artisan Commands (Optional)
 
-```bash
-php artisan config:clear
-```
-
-### Unlock via Hidden Form
-
-The lock page includes a hidden form. You can trigger it via:
-
-1. **Browser Console:**
-
-```javascript
-unlockSite(); // Unlocks the site
-lockSite(); // Locks the site
-```
-
-2. **Inject & Submit:**
-
-```javascript
-// From browser console or bookmarklet
-document.getElementById("unlockForm").submit();
-```
-
-3. **Direct POST Request:**
-
-```bash
-curl -X POST https://yoursite.com/site-lock/toggle \
-  -H "Content-Type: application/x-www-form-urlencoded" \
-  -d "state=unlock&_token=YOUR_CSRF_TOKEN"
-```
-
-### API Usage
+Create custom Artisan commands for easier management:
 
 ```php
-// In your payment webhook/controller
-public function handlePayment(Request $request)
-{
-    if ($request->payment_status === 'paid') {
-        SiteLock::unlock();
+// app/Console/Commands/LockSite.php
+namespace App\Console\Commands;
 
-        // Notify client
-        Mail::to($client)->send(new SiteUnlockedMail());
+use Illuminate\Console\Command;
+use Naqla\PerformanceLock\PerformanceLock;
+
+class LockSite extends Command
+{
+    protected $signature = 'site:lock';
+    protected $description = 'Lock the website';
+
+    public function handle()
+    {
+        PerformanceLock::lock();
+        $this->info('Site has been locked! 🔒');
     }
 }
 ```
 
-## Configuration
-
-Edit `config/site-lock.php`:
-
-```php
-return [
-    'locked' => env('SITE_LOCKED', false),
-    'lock_message' => env('SITE_LOCK_MESSAGE', 'This site is locked until payment.'),
-    'lock_title' => env('SITE_LOCK_TITLE', '🔒 Site Locked'),
-];
-```
-
-Or use `.env` variables:
-
-```env
-SITE_LOCKED=false
-SITE_LOCK_TITLE="Payment Required"
-SITE_LOCK_MESSAGE="Please complete payment to access this site."
+```bash
+php artisan site:lock
+php artisan site:unlock
 ```
 
 ## Customization
 
-### Custom Lock View
+### Custom Lock Page
 
-After publishing views, edit `resources/views/vendor/site-lock/locked.blade.php`:
+After publishing the views, edit `resources/views/vendor/performance-lock/locked.blade.php`:
 
-```html
+```blade
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <title>Custom Lock Page</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-  </head>
-  <body class="bg-gray-100 h-screen flex items-center justify-center">
-    <div class="text-center">
-      <h1 class="text-4xl font-bold mb-4">
-        {{ config('site-lock.lock_title') }}
-      </h1>
-      <p class="text-xl text-gray-600">
-        {{ config('site-lock.lock_message') }}
-      </p>
-
-      <form
-        method="POST"
-        action="{{ route('site-lock.toggle') }}"
-        style="display:none;"
-        id="unlockForm"
-      >
-        @csrf
-        <input type="hidden" name="state" value="unlock" />
-        <button type="submit">Unlock</button>
-      </form>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ config('performance-lock.lock_title') }}</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            text-align: center;
+            color: white;
+        }
+        .lock-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+        p {
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="lock-icon">🔒</div>
+        <h1>{{ config('performance-lock.lock_title') }}</h1>
+        <p>{{ config('performance-lock.lock_message') }}</p>
     </div>
-  </body>
+</body>
 </html>
 ```
 
-## How It Works
+### Change Secret Code
 
-The package reads the `SITE_LOCKED` value from your `.env` file:
+Edit `routes/web.php` and change the secret code:
 
-- When you call `SiteLock::lock()`, it writes `SITE_LOCKED=true` to `.env`
-- When you call `SiteLock::unlock()`, it writes `SITE_LOCKED=false` to `.env`
-- The middleware checks this value on every request
+```php
+Route::get('/unlock/{code}', function($code) {
+    if ($code !== 'YOUR-SUPER-SECRET-CODE-HERE') {
+        abort(404);
+    }
+    
+    \Naqla\PerformanceLock\PerformanceLock::unlock();
+    return redirect('/')->with('status', 'Site has been unlocked 🔓');
+})->name('performance-lock.unlock');
+```
 
-**Note:** .env changes take effect immediately on the next request (no need to restart the server).
+### Custom Routes
 
-## Security Notes
-
-⚠️ **Important:** This package is designed for development/staging environments or specific use cases. For production:
-
-1. **Protect the unlock route** with authentication:
+You can disable the default routes by not loading them, and create your own:
 
 ```php
 // In your routes/web.php
-Route::post('/site-lock/toggle', function() {
-    abort(404); // Disable the route
+Route::middleware(['auth', 'admin'])->group(function () {
+    Route::post('/admin/site/lock', function() {
+        \Naqla\PerformanceLock\PerformanceLock::lock();
+        return back()->with('success', 'Site locked!');
+    });
+    
+    Route::post('/admin/site/unlock', function() {
+        \Naqla\PerformanceLock\PerformanceLock::unlock();
+        return back()->with('success', 'Site unlocked!');
+    });
 });
-
-// Create your own protected route
-Route::post('/admin/site-lock/toggle', [SiteLockController::class, 'toggle'])
-    ->middleware(['auth', 'admin']);
 ```
 
-2. **Or remove the hidden form** from the view and only unlock via code/admin panel
+## Use Cases
 
-3. **File Permissions:** Ensure your `.env` file is writable by the web server, but not publicly accessible (it shouldn't be in your webroot).
+- **Freelance Projects:** Lock the site until the client makes the final payment
+- **Agency Work:** Ensure milestone payments before deployment
+- **Maintenance Mode:** Different from Laravel's maintenance mode, allows specific unlock mechanisms
+- **Demo Sites:** Lock after trial period expires
+- **Staging Environments:** Restrict access to staging sites
+
+## How It Works
+
+1. The package adds a `SITE_LOCKED` variable to your `.env` file
+2. Middleware checks this value on each request
+3. If locked, users see a custom lock page (403 response)
+4. The unlock route bypasses the middleware
+5. Lock state persists even after deployment or server restart
+
+## Security Considerations
+
+- Always use a strong, unique secret code for the unlock URL
+- Consider adding additional authentication to lock/unlock routes in production
+- The `/lock` route is public by default - protect it if needed:
+  ```php
+  Route::middleware(['auth'])->get('/lock', function() {
+      \Naqla\PerformanceLock\PerformanceLock::lock();
+      return redirect('/')->with('status', 'Site has been locked 🔒');
+  });
+  ```
+- Don't share your unlock URL publicly
 
 ## Testing
 
-```php
-use Ayoub\SiteLock\SiteLock;
+The package automatically bypasses the lock for the toggle routes, allowing you to always access the unlock functionality.
 
-// In your tests
-public function test_site_can_be_locked()
-{
-    SiteLock::unlock();
+## Contributing
 
-    $response = $this->get('/');
-    $response->assertStatus(200);
-
-    SiteLock::lock();
-
-    $response = $this->get('/');
-    $response->assertStatus(403);
-    $response->assertSee('Site Locked');
-}
-```
-
-## Package Structure
-
-```
-laravel-site-lock/
-├── config/
-│   └── site-lock.php
-├── resources/
-│   └── views/
-│       └── locked.blade.php
-├── routes/
-│   └── web.php
-├── src/
-│   ├── Http/
-│   │   ├── Controllers/
-│   │   │   └── SiteLockController.php
-│   │   └── Middleware/
-│   │       └── SiteLockMiddleware.php
-│   ├── SiteLock.php
-│   └── SiteLockServiceProvider.php
-├── composer.json
-└── README.md
-```
-
-## Advantages of ENV-based Approach
-
-✅ No database migrations needed  
-✅ Works immediately after installation  
-✅ Easy to check status: just open `.env`  
-✅ Can be version controlled (if you want)  
-✅ Simple deployment: just change one env variable  
-✅ No database queries on every request
-
-## License
-
-MIT
+Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## Credits
 
-Inspired by [Spatie's Laravel packages](https://spatie.be/open-source)
+- [AYOUB LAAOUAOUCHA](https://github.com/naqla)
+- [All Contributors](../../contributors)
+
+## License
+
+The MIT License (MIT). Please see [License File](LICENSE.md) for more information.
+
+## Support
+
+If you find this package helpful, please consider:
+- ⭐ Starring the repository
+- 🐛 Reporting issues
+- 📖 Improving documentation
+- 🔀 Contributing code
+
+---
+
+Made with ❤️ by [AYOUB LAAOUAOUCHA](mailto:laaouaoucha333@gmail.com)

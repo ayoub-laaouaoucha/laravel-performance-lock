@@ -30,5 +30,5 @@ return [
     | The title displayed when the site is locked.
     |
     */
-    'lock_title' => env('SITE_LOCK_TITLE', '🔒 Site Locked'),
+    'lock_title' => env('SITE_LOCK_TITLE', 'Site Locked'),
 ];

@@ -1,10 +1,10 @@
 <?php
 
-namespace Ayoub\SiteLock;
+namespace Naqla\PerformanceLock;
 
 use Illuminate\Support\Facades\File;
 
-class SiteLock
+class PerformanceLock
 {
     protected static function getEnvFilePath(): string
     {
@@ -63,7 +63,7 @@ class SiteLock
 
         // Clear config cache to reflect changes
         if (function_exists('config')) {
-            config(['site-lock.locked' => $locked]);
+            config(['performance-lock.locked' => $locked]);
         }
     }
 }
