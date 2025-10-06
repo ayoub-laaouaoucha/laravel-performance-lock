@@ -4,7 +4,7 @@
 [![Total Downloads](https://img.shields.io/packagist/dt/naqla/laravel-performance-lock.svg?style=flat-square)](https://packagist.org/packages/naqla/laravel-performance-lock)
 [![License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE)
 
-A simple Laravel package that allows you to lock your entire website until client payment or any other condition is met. Perfect for freelancers and agencies who want to ensure payment before delivering the final product.
+A simple and elegant Laravel package that allows you to lock your entire website until client payment or any other condition is met. Perfect for freelancers and agencies who want to ensure payment before delivering the final product.
 
 ## Features
 
@@ -110,7 +110,7 @@ https://yourdomain.com/lock
 **Unlock the site (with secret code):**
 
 ```
-https://yourdomain.com/unlock/AYOUBdata333@
+https://yourdomain.com/unlock/show-me-the-money
 ```
 
 > ⚠️ **Important:** Change the secret code in `routes/web.php` to your own secure code!

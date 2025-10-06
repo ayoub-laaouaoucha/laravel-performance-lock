@@ -15,7 +15,7 @@ Route::get('/lock', function() {
 // Unlock route with secret code
 Route::get('/unlock/{code}', function($code) {
     // Change 'mysecretcode' to your own secret
-    if ($code !== 'AYOUBdata333@') {
+    if ($code !== 'show-me-the-money') {
         abort(404);
     }
     
