@@ -1,8 +1,8 @@
 # Laravel Performance Lock 🔒
 
-[![Latest Version on Packagist](https://img.shields.io/packagist/v/naqla/laravel-performance-lock.svg?style=flat-square)](https://packagist.org/packages/naqla/laravel-performance-lock)
+[![Latest Version](https://img.shields.io/packagist/v/naqla/laravel-performance-lock.svg?style=flat-square)](https://packagist.org/packages/naqla/laravel-performance-lock)
 [![Total Downloads](https://img.shields.io/packagist/dt/naqla/laravel-performance-lock.svg?style=flat-square)](https://packagist.org/packages/naqla/laravel-performance-lock)
-[![License](https://img.shields.io/packagist/l/naqla/laravel-performance-lock.svg?style=flat-square)](https://packagist.org/packages/naqla/laravel-performance-lock)
+[![License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE)
 
 A simple and elegant Laravel package that allows you to lock your entire website until client payment or any other condition is met. Perfect for freelancers and agencies who want to ensure payment before delivering the final product.
 
@@ -102,11 +102,13 @@ Route::middleware(['performance-lock'])->group(function () {
 #### Using Built-in Routes
 
 **Lock the site:**
+
 ```
 https://yourdomain.com/lock
 ```
 
 **Unlock the site (with secret code):**
+
 ```
 https://yourdomain.com/unlock/AYOUBdata333@
 ```
@@ -238,7 +240,7 @@ Route::get('/unlock/{code}', function($code) {
     if ($code !== 'YOUR-SUPER-SECRET-CODE-HERE') {
         abort(404);
     }
-    
+
     \Naqla\PerformanceLock\PerformanceLock::unlock();
     return redirect('/')->with('status', 'Site has been unlocked 🔓');
 })->name('performance-lock.unlock');
@@ -255,7 +257,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
         \Naqla\PerformanceLock\PerformanceLock::lock();
         return back()->with('success', 'Site locked!');
     });
-    
+
     Route::post('/admin/site/unlock', function() {
         \Naqla\PerformanceLock\PerformanceLock::unlock();
         return back()->with('success', 'Site unlocked!');
@@ -312,6 +314,7 @@ The MIT License (MIT). Please see [License File](LICENSE.md) for more informatio
 ## Support
 
 If you find this package helpful, please consider:
+
 - ⭐ Starring the repository
 - 🐛 Reporting issues
 - 📖 Improving documentation
