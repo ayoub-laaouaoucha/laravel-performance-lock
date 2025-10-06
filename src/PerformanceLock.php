@@ -6,26 +6,50 @@ use Illuminate\Support\Facades\File;
 
 class PerformanceLock
 {
-    protected static function getEnvFilePath(): string
+    /**
+     * Get the lock file path (hidden in vendor package)
+     */
+    protected static function getLockFilePath(): string
     {
-        return base_path('.env');
+        return __DIR__ . '/../.lock';
     }
 
+    /**
+     * Check if site is locked
+     */
     public static function isLocked(): bool
     {
-        return env('PERFORMANCE_LOCKED', false) === true || env('PERFORMANCE_LOCKED') === 'true' || env('PERFORMANCE_LOCKED') === '1';
+        return File::exists(self::getLockFilePath());
     }
 
+    /**
+     * Lock the site
+     */
     public static function lock(): void
     {
-        self::setState(true);
+        $lockData = [
+            'locked' => true,
+            'locked_at' => now()->toDateTimeString(),
+            'locked_by_ip' => request()->ip() ?? 'console',
+            'user_agent' => request()->userAgent() ?? 'N/A',
+        ];
+
+        File::put(self::getLockFilePath(), json_encode($lockData, JSON_PRETTY_PRINT));
     }
 
+    /**
+     * Unlock the site
+     */
     public static function unlock(): void
     {
-        self::setState(false);
+        if (File::exists(self::getLockFilePath())) {
+            File::delete(self::getLockFilePath());
+        }
     }
 
+    /**
+     * Toggle lock state
+     */
     public static function toggle(): void
     {
         if (self::isLocked()) {
@@ -35,35 +59,43 @@ class PerformanceLock
         }
     }
 
-    protected static function setState(bool $locked): void
+    /**
+     * Get lock information
+     * 
+     * @return array|null
+     */
+    public static function getLockInfo(): ?array
     {
-        $envPath = self::getEnvFilePath();
-        
-        if (!File::exists($envPath)) {
-            return;
+        if (!self::isLocked()) {
+            return null;
         }
 
-        $envContent = File::get($envPath);
-        $value = $locked ? 'true' : 'false';
+        try {
+            $content = File::get(self::getLockFilePath());
+            return json_decode($content, true);
+        } catch (\Exception $e) {
+            return null;
+        }
+    }
+
+    /**
+     * Get locked duration in human readable format
+     * 
+     * @return string|null
+     */
+    public static function getLockedDuration(): ?string
+    {
+        $info = self::getLockInfo();
         
-        // Check if PERFORMANCE_LOCKED exists
-        if (preg_match('/^PERFORMANCE_LOCKED=.*/m', $envContent)) {
-            // Update existing value
-            $envContent = preg_replace(
-                '/^PERFORMANCE_LOCKED=.*/m',
-                "PERFORMANCE_LOCKED={$value}",
-                $envContent
-            );
-        } else {
-            // Add new line
-            $envContent = rtrim($envContent) . "\n\nPERFORMANCE_LOCKED={$value}\n";
+        if (!$info || !isset($info['locked_at'])) {
+            return null;
         }
 
-        File::put($envPath, $envContent);
-
-        // Clear config cache to reflect changes
-        if (function_exists('config')) {
-            config(['performance-lock.locked' => $locked]);
+        try {
+            $lockedAt = \Carbon\Carbon::parse($info['locked_at']);
+            return $lockedAt->diffForHumans();
+        } catch (\Exception $e) {
+            return null;
         }
     }
 }
