@@ -1,7 +1,7 @@
 # Laravel Performance Lock 🔒
 
 [![Latest Version](https://img.shields.io/packagist/v/naqla/laravel-performance-lock.svg?style=flat-square)](https://packagist.org/packages/naqla/laravel-performance-lock)
-[![Total Downloads](https://img.shields.io/packagist/dt/naqla/laravel-performance-lock.svg?style=flat-square)](https://packagist.org/packages/naqla/laravel-performance-lock)
+[![Total Downloads](https://img.shields.io/packagist/dt/naqla/laravel-performance-lock.svg?style=flat-square&cacheBust=1)](https://packagist.org/packages/naqla/laravel-performance-lock)
 [![License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE)
 
 A simple and elegant Laravel package that allows you to lock your entire website until client payment or any other condition is met. Perfect for freelancers and agencies who want to ensure payment before delivering the final product.
