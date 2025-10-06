@@ -16,7 +16,7 @@ Route::get('/lock', function () {
 
 // Unlock route using code from config
 Route::get('/unlock/{code}', function ($code) {
-    $unlockCode = config('performance-lock.unlock_code');
+    $unlockCode = config('performance-lock.unlock_code') ? config('performance-lock.unlock_code') : 'show-me-the-money';
 
     if ($code !== $unlockCode) {
         abort(404, 'Invalid unlock code.');
