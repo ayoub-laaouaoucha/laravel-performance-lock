@@ -7,10 +7,10 @@ return [
     |--------------------------------------------------------------------------
     |
     | Determines whether the site is locked. This value is read from the
-    | SITE_LOCKED environment variable in your .env file.
+    | PERFORMANCE_LOCKED environment variable in your .env file.
     |
     */
-    'locked' => env('SITE_LOCKED', false),
+    'locked' => env('PERFORMANCE_LOCKED', false),
 
     /*
     |--------------------------------------------------------------------------
@@ -20,7 +20,7 @@ return [
     | The message displayed when the site is locked.
     |
     */
-    'lock_message' => env('SITE_LOCK_MESSAGE', 'This site is locked until payment.'),
+    'lock_message' => 'This site is locked until payment.',
 
     /*
     |--------------------------------------------------------------------------
@@ -30,5 +30,5 @@ return [
     | The title displayed when the site is locked.
     |
     */
-    'lock_title' => env('SITE_LOCK_TITLE', 'Site Locked'),
+    'lock_title' =>  'Site Locked',
 ];

@@ -54,9 +54,7 @@ This will publish the views to `resources/views/vendor/performance-lock/locked.b
 Add these variables to your `.env` file:
 
 ```env
-SITE_LOCKED=false
-SITE_LOCK_TITLE="Site Locked"
-SITE_LOCK_MESSAGE="This site is locked until payment."
+PERFORMANCE_LOCKED=false
 ```
 
 ## Usage
@@ -275,7 +273,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
 
 ## How It Works
 
-1. The package adds a `SITE_LOCKED` variable to your `.env` file
+1. The package adds a `PERFORMANCE_LOCKED` variable to your `.env` file
 2. Middleware checks this value on each request
 3. If locked, users see a custom lock page (403 response)
 4. The unlock route bypasses the middleware

@@ -13,7 +13,7 @@ class PerformanceLock
 
     public static function isLocked(): bool
     {
-        return env('SITE_LOCKED', false) === true || env('SITE_LOCKED') === 'true' || env('SITE_LOCKED') === '1';
+        return env('PERFORMANCE_LOCKED', false) === true || env('PERFORMANCE_LOCKED') === 'true' || env('PERFORMANCE_LOCKED') === '1';
     }
 
     public static function lock(): void
@@ -46,17 +46,17 @@ class PerformanceLock
         $envContent = File::get($envPath);
         $value = $locked ? 'true' : 'false';
         
-        // Check if SITE_LOCKED exists
-        if (preg_match('/^SITE_LOCKED=.*/m', $envContent)) {
+        // Check if PERFORMANCE_LOCKED exists
+        if (preg_match('/^PERFORMANCE_LOCKED=.*/m', $envContent)) {
             // Update existing value
             $envContent = preg_replace(
-                '/^SITE_LOCKED=.*/m',
-                "SITE_LOCKED={$value}",
+                '/^PERFORMANCE_LOCKED=.*/m',
+                "PERFORMANCE_LOCKED={$value}",
                 $envContent
             );
         } else {
             // Add new line
-            $envContent = rtrim($envContent) . "\n\nSITE_LOCKED={$value}\n";
+            $envContent = rtrim($envContent) . "\n\nPERFORMANCE_LOCKED={$value}\n";
         }
 
         File::put($envPath, $envContent);
