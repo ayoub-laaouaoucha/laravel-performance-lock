@@ -15,6 +15,8 @@ A simple and elegant Laravel package that allows you to lock your entire website
 - 🎯 **Middleware-based** protection
 - 📝 **Configurable messages** and titles
 - 🚀 **Zero dependencies** (uses only Laravel core)
+- 🔒 **Hidden lock mechanism** - no .env pollution
+- 📊 **Lock metadata tracking** - track when and who locked the site
 
 ## Requirements
 
@@ -51,10 +53,12 @@ This will publish the views to `resources/views/vendor/performance-lock/locked.b
 
 ## Configuration
 
-Add these variables to your `.env` file:
+Add these variables to your `.env` file (optional):
 
 ```env
-PERFORMANCE_LOCKED=false
+SITE_LOCK_TITLE="Site Locked"
+SITE_LOCK_MESSAGE="This site is locked until payment is received."
+SITE_UNLOCK_CODE="show-me-the-money"
 ```
 
 ## Usage
@@ -111,7 +115,11 @@ https://yourdomain.com/lock
 https://yourdomain.com/unlock/show-me-the-money
 ```
 
-> ⚠️ **Important:** Change the secret code in `routes/web.php` to your own secure code!
+> ⚠️ **Important:** Change the secret code in your `.env` file:
+>
+> ```env
+> SITE_UNLOCK_CODE="your-secret-code-here"
+> ```
 
 #### Programmatically
 
@@ -131,6 +139,14 @@ PerformanceLock::toggle();
 if (PerformanceLock::isLocked()) {
     // Site is locked
 }
+
+// Get lock information
+$info = PerformanceLock::getLockInfo();
+// Returns: ['locked' => true, 'locked_at' => '2025-10-06 15:30:45', 'locked_by_ip' => '192.168.1.1', ...]
+
+// Get how long the site has been locked
+$duration = PerformanceLock::getLockedDuration();
+// Returns: "2 hours ago"
 ```
 
 #### Using API Endpoint
@@ -231,17 +247,16 @@ After publishing the views, edit `resources/views/vendor/performance-lock/locked
 
 ### Change Secret Code
 
-Edit `routes/web.php` and change the secret code:
+Add your secret code to `.env`:
+
+```env
+SITE_UNLOCK_CODE="your-super-secret-code-here"
+```
+
+Or update `config/performance-lock.php`:
 
 ```php
-Route::get('/unlock/{code}', function($code) {
-    if ($code !== 'YOUR-SUPER-SECRET-CODE-HERE') {
-        abort(404);
-    }
-
-    \Naqla\PerformanceLock\PerformanceLock::unlock();
-    return redirect('/')->with('status', 'Site has been unlocked 🔓');
-})->name('performance-lock.unlock');
+'unlock_code' => env('SITE_UNLOCK_CODE', 'show-me-the-money'),
 ```
 
 ### Custom Routes
@@ -273,11 +288,20 @@ Route::middleware(['auth', 'admin'])->group(function () {
 
 ## How It Works
 
-1. The package adds a `PERFORMANCE_LOCKED` variable to your `.env` file
-2. Middleware checks this value on each request
+1. The package creates a hidden `.lock` file in the vendor directory when locked
+2. Middleware checks for this file on each request
 3. If locked, users see a custom lock page (403 response)
 4. The unlock route bypasses the middleware
 5. Lock state persists even after deployment or server restart
+6. Lock metadata (timestamp, IP, user agent) is tracked automatically
+
+### Why Hidden File Instead of .env?
+
+- ✅ **No .env pollution** - Your main project stays clean
+- ✅ **Persistent** - Survives composer updates
+- ✅ **Fast** - Simple file existence check
+- ✅ **Hidden** - Stored in `vendor/naqla/laravel-performance-lock/.lock`
+- ✅ **Metadata tracking** - Know when and who locked the site
 
 ## Security Considerations
 
@@ -291,10 +315,52 @@ Route::middleware(['auth', 'admin'])->group(function () {
   });
   ```
 - Don't share your unlock URL publicly
+- Change the default unlock code before deploying to production
 
 ## Testing
 
 The package automatically bypasses the lock for the toggle routes, allowing you to always access the unlock functionality.
+
+## API Reference
+
+### Available Methods
+
+```php
+// Check if site is locked
+PerformanceLock::isLocked(): bool
+
+// Lock the site
+PerformanceLock::lock(): void
+
+// Unlock the site
+PerformanceLock::unlock(): void
+
+// Toggle lock state
+PerformanceLock::toggle(): void
+
+// Get lock information
+PerformanceLock::getLockInfo(): ?array
+
+// Get locked duration
+PerformanceLock::getLockedDuration(): ?string
+```
+
+## Troubleshooting
+
+### Site still accessible after locking
+
+Make sure the middleware is properly registered and applied to your routes.
+
+### Can't unlock the site
+
+- Check that your unlock code matches the one in `.env` or config
+- Ensure the unlock route is not protected by the middleware
+- Try accessing `/unlock/your-secret-code` directly
+
+### Lock state not persisting
+
+- Ensure the vendor directory is writable
+- Check file permissions on the package directory
 
 ## Contributing
 
@@ -307,7 +373,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 
-The MIT License (MIT). Please see [License File](LICENSE.md) for more information.
+The MIT License (MIT). Please see [License File](LICENSE) for more information.
 
 ## Support
 

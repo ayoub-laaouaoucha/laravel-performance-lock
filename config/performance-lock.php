@@ -9,7 +9,7 @@ return [
     | The message displayed when the site is locked.
     |
     */
-    'lock_message' => env('SITE_LOCK_MESSAGE', 'This site is locked until payment is received.'),
+    'lock_message' => env('SITE_LOCK_MESSAGE', 'This website is Blocked !!!'),
 
     /*
     |--------------------------------------------------------------------------
